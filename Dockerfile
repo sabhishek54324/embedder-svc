@@ -1,4 +1,4 @@
-# ── Build args ────────────────────────────────────────────────────────────────
+﻿# ── Build args ────────────────────────────────────────────────────────────────
 # Set BASE_IMAGE to nvidia/cuda image for GPU builds, python:3.11-slim for CPU
 ARG BASE_IMAGE=python:3.11-slim
 
@@ -33,19 +33,15 @@ COPY requirements.txt .
 RUN python3.11 -m pip install --upgrade pip && python3.11 -m pip install -r requirements.txt
 
 # ── Pre-download model into image (offline inference) ─────────────────────────
-ARG EMBEDDING_MODEL=multi-qa-MiniLM-L6-cos-v1
+ARG EMBEDDING_MODEL=BAAI/bge-base-en-v1.5
 ENV EMBEDDING_MODEL=${EMBEDDING_MODEL} \
-    TOKENIZER_MODEL=sentence-transformers/${EMBEDDING_MODEL} \
+    TOKENIZER_MODEL=${EMBEDDING_MODEL} \
     HF_HOME=/app/.cache/huggingface \
     TRANSFORMERS_CACHE=/app/.cache/huggingface \
     SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface \
     TRANSFORMERS_OFFLINE=0
 
-RUN python3.11 -c "\
-from sentence_transformers import SentenceTransformer; \
-from transformers import AutoTokenizer; \
-SentenceTransformer('multi-qa-MiniLM-L6-cos-v1'); \
-AutoTokenizer.from_pretrained('sentence-transformers/multi-qa-MiniLM-L6-cos-v1')"
+RUN python3.11 -c "import os; from sentence_transformers import SentenceTransformer; from transformers import AutoTokenizer; model=os.environ['EMBEDDING_MODEL']; tokenizer=os.environ.get('TOKENIZER_MODEL') or model; SentenceTransformer(model); AutoTokenizer.from_pretrained(tokenizer)"
 
 # Switch to offline mode so the container never calls home
 ENV TRANSFORMERS_OFFLINE=1 \

@@ -1,15 +1,18 @@
-services:
+﻿services:
   embedder-cpu:
     build:
       context: .
       args:
         BASE_IMAGE: python:3.11-slim
+        EMBEDDING_MODEL: BAAI/bge-base-en-v1.5
     image: embedder-svc:cpu
     container_name: embedder-svc-cpu
     ports:
       - "8001:8000"
     environment:
       VECTOR_EMBEDDER_API_KEY: abc123
+      EMBEDDING_MODEL: BAAI/bge-base-en-v1.5
+      TOKENIZER_MODEL: BAAI/bge-base-en-v1.5
     profiles: [cpu]
 
   embedder-gpu:
@@ -18,12 +21,15 @@ services:
       args:
         # CUDA 12.1 + cuDNN 8 — change tag to match your driver
         BASE_IMAGE: nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+        EMBEDDING_MODEL: BAAI/bge-base-en-v1.5
     image: embedder-svc:gpu
     container_name: embedder-svc-gpu
     ports:
       - "8001:8000"
     environment:
       VECTOR_EMBEDDER_API_KEY: abc123
+      EMBEDDING_MODEL: BAAI/bge-base-en-v1.5
+      TOKENIZER_MODEL: BAAI/bge-base-en-v1.5
     deploy:
       resources:
         reservations:
